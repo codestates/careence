@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅 앱</title>
+    <style>
+      /* 전체 채팅 컨테이너 스타일링 */
+      body {
+          background-color: #e0e0f0; /* 배경색: 연한 푸른색 */
+          font-size: 18px; /* 글자 크기 설정 */
+      }
+  
+      /* 사용자 메시지 스타일링 */
+      .user-message {
+          background-color: #3498db; /* 사용자 메시지 배경색: 푸른색 */
+          color: #fff; /* 글자색: 흰색 */
+          padding: 10px;
+          margin: 10px;
+          border-radius: 5px;
+      }
+  
+      /* 오토봇 메시지 스타일링 */
+      .bot-message {
+          background-color: #f1c40f; /* 오토봇 메시지 배경색: 노란색 */
+          color: #000; /* 글자색: 검은색 */
+          padding: 10px;
+          margin: 10px;
+          border-radius: 5px;
+      }
+  
+      /* 전송 버튼 스타일링 */
+      #send-button {
+          background-color: #3498db; /* 버튼 배경색: 푸른색 */
+          color: #fff; /* 버튼 글자색: 흰색 */
+          border: none;
+          padding: 10px 20px;
+          margin: 10px;
+          border-radius: 5px;
+          cursor: pointer;
+      }
+  </style>
+  
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat">
+            <div class="chat-log" id="chat-log">
+                <!-- 채팅 로그가 여기에 표시됩니다. -->
+            </div>
+            <input type="text" id="user-input" placeholder="메시지 입력...">
+            <button id="send-button">전송</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript 코드를 여기에 추가하세요.
+        // API 호출 및 대화 로직을 구현하세요.
+  // API 키를 정의합니다.
+const apiKey = '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'; // 여기에 실제 API 키를 입력하세요.
+
+// API 엔드포인트를 정의합니다.
+const apiEndpoint = 'https://api.openai.com/v1/chat/completions';
+
+// DOM 요소를 가져옵니다.
+const chatLog = document.getElementById('chat-log');
+const userInput = document.getElementById('user-input');
+const sendButton = document.getElementById('send-button');
+
+// 사용자 메시지를 전송합니다.
+function sendUserMessage(message) {
+    const userMessage = document.createElement('div');
+    userMessage.classList.add('user-message');
+    userMessage.textContent = message;
+    userMessage.innerHTML = message.replace(/\n/g, '<br>'); 
+    chatLog.appendChild(userMessage);
+
+    // API를 호출하여 오토봇의 답변을 받아옵니다.
+    fetch(apiEndpoint, {
+        method: 'POST',
+        body: JSON.stringify({ 
+          model: 'gpt-3.5-turbo',
+          messages: [{role: 'user', 'content': message}] 
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}` // API 키를 헤더에 추가합니다.
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        const botMessage = document.createElement('div');
+        botMessage.classList.add('bot-message');
+        botMessage.textContent = data.choices[0].message.content;
+        chatLog.appendChild(botMessage);
+    });
+
+    userInput.value = ''; // 입력 필드 초기화
+}
+
+// 사용자가 메시지를 입력하고 Enter 키를 누를 때 메시지를 전송합니다.
+userInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+        sendUserMessage(userInput.value);
+    }
+});
+
+// 전송 버튼을 클릭할 때 메시지를 전송합니다.
+sendButton.addEventListener('click', () => {
+    sendUserMessage(userInput.value);
+});
+
+
+    </script>
+</body>
+</html>
